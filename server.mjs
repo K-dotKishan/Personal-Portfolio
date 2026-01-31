@@ -1,47 +1,39 @@
 import express from "express";
-import mongoose from "mongoose";
-import nodemailer from "nodemailer";
 import cors from "cors";
+import mongoose from "mongoose";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const app = express();
 
-// Middleware
+// ✅ middleware
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection
+// ✅ MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
-  .catch(err => console.error("❌ MongoDB error:", err));
+  .catch(err => console.error("❌ MongoDB error", err));
 
-// Schema
-const contactSchema = new mongoose.Schema({
+// ✅ Health check
+app.get("/", (req, res) => {
+  res.send("🚀 Backend is running successfully");
+});
+
+// ✅ Contact schema
+const ContactSchema = new mongoose.Schema({
   name: String,
   email: String,
   message: String,
-  createdAt: { type: Date, default: Date.now },
 });
 
-const Contact = mongoose.model("Contact", contactSchema);
+const Contact = mongoose.model("Contact", ContactSchema);
 
-// Email transporter
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-// API route
+// ✅ Contact API
 app.post("/contact", async (req, res) => {
   try {
-    console.log("REQ BODY:", req.body);
-
     const { name, email, message } = req.body;
 
     if (!name || !email || !message) {
@@ -50,27 +42,15 @@ app.post("/contact", async (req, res) => {
 
     await Contact.create({ name, email, message });
 
-    await transporter.sendMail({
-      from: `"Portfolio Contact" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_USER,
-      subject: "New Portfolio Contact",
-      html: `
-        <h3>New Message</h3>
-        <p><b>Name:</b> ${name}</p>
-        <p><b>Email:</b> ${email}</p>
-        <p><b>Message:</b> ${message}</p>
-      `,
-    });
-
-    res.send("Message sent successfully");
+    res.status(200).send("Message saved successfully");
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
   }
 });
 
-// Server
+// ✅ PORT (Railway/Render compatible)
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
-  console.log(`🚀 Server running on port ${PORT}`)
-);
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
