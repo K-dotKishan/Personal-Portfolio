@@ -22,10 +22,8 @@ if (themeToggle) {
     html.setAttribute("data-theme", next);
     localStorage.setItem("theme", next);
 
-    if (sunIcon && moonIcon) {
-      sunIcon.style.display = next === "dark" ? "none" : "block";
-      moonIcon.style.display = next === "dark" ? "block" : "none";
-    }
+    sunIcon.style.display = next === "dark" ? "none" : "block";
+    moonIcon.style.display = next === "dark" ? "block" : "none";
   });
 }
 
@@ -94,7 +92,9 @@ const observer = new IntersectionObserver(
 
 document.addEventListener("DOMContentLoaded", () => {
   document
-    .querySelectorAll(".cv-card, .skill-category, .project-card, .achievement-item")
+    .querySelectorAll(
+      ".cv-card, .skill-category, .project-card, .achievement-item"
+    )
     .forEach(el => {
       el.style.opacity = "0";
       el.style.transform = "translateY(20px)";
@@ -119,9 +119,14 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // =================================================
-// ===== CONTACT FORM (RENDER BACKEND CONNECTED) ====
+// ===== CONTACT FORM (LOCAL + RAILWAY AUTO) =======
 // =================================================
 const contactForm = document.querySelector(".contact-form");
+
+const API_URL =
+  location.hostname === "localhost"
+    ? "http://localhost:5000/contact"
+    : "https://personal-portfolio-production-aa0d.up.railway.app/contact";
 
 if (contactForm) {
   contactForm.addEventListener("submit", async e => {
@@ -136,14 +141,11 @@ if (contactForm) {
     };
 
     try {
-      const response = await fetch(
-        "https://YOUR-RENDER-URL.onrender.com/contact",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
 
       const result = await response.text();
 
