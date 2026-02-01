@@ -14,18 +14,14 @@ if (sunIcon && moonIcon) {
   moonIcon.style.display = savedTheme === "dark" ? "block" : "none";
 }
 
-if (themeToggle) {
-  themeToggle.addEventListener("click", () => {
-    const current = html.getAttribute("data-theme");
-    const next = current === "light" ? "dark" : "light";
+themeToggle?.addEventListener("click", () => {
+  const next = html.getAttribute("data-theme") === "light" ? "dark" : "light";
+  html.setAttribute("data-theme", next);
+  localStorage.setItem("theme", next);
 
-    html.setAttribute("data-theme", next);
-    localStorage.setItem("theme", next);
-
-    sunIcon.style.display = next === "dark" ? "none" : "block";
-    moonIcon.style.display = next === "dark" ? "block" : "none";
-  });
-}
+  sunIcon.style.display = next === "dark" ? "none" : "block";
+  moonIcon.style.display = next === "dark" ? "block" : "none";
+});
 
 // ===============================
 // ===== LOAD NAVBAR ==============
@@ -56,9 +52,7 @@ fetch("navbar.html")
 // ===== FOOTER YEAR ==============
 // ===============================
 const yearSpan = document.getElementById("year");
-if (yearSpan) {
-  yearSpan.textContent = new Date().getFullYear();
-}
+if (yearSpan) yearSpan.textContent = new Date().getFullYear();
 
 // ===============================
 // ===== SMOOTH SCROLL ============
@@ -108,7 +102,6 @@ document.addEventListener("DOMContentLoaded", () => {
 // ===============================
 document.addEventListener("DOMContentLoaded", () => {
   const page = window.location.pathname.split("/").pop() || "index.html";
-
   setTimeout(() => {
     document.querySelectorAll(".nav-links a").forEach(link => {
       if (link.getAttribute("href") === page) {
@@ -124,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
 const contactForm = document.querySelector(".contact-form");
 
 const API_URL =
-  location.hostname === "localhost"
+  location.hostname === "localhost" || location.hostname === "127.0.0.1"
     ? "http://localhost:5000/contact"
     : "https://personal-portfolio-production-aa0d.up.railway.app/contact";
 
@@ -132,12 +125,14 @@ if (contactForm) {
   contactForm.addEventListener("submit", async e => {
     e.preventDefault();
 
-    const formData = new FormData(contactForm);
+    const submitBtn = contactForm.querySelector("button");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Sending...";
 
     const data = {
-      name: formData.get("name"),
-      email: formData.get("email"),
-      message: formData.get("message"),
+      name: contactForm.name.value.trim(),
+      email: contactForm.email.value.trim(),
+      message: contactForm.message.value.trim(),
     };
 
     try {
@@ -158,6 +153,9 @@ if (contactForm) {
     } catch (err) {
       console.error(err);
       alert("❌ Backend not reachable");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Send Message";
     }
   });
 }
